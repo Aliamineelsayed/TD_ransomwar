@@ -136,3 +136,4 @@ def clean(self) -> None:
         self._salt = None
         self._key = None
         self._token = None
+        
